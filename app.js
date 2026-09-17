@@ -7,6 +7,8 @@
   const answers = Array(questions.length).fill(null);
   let currentQuestion = 0;
   let saveState = "not-started";
+  let eligibilityConfirmed = false;
+  let savingConsent = false;
   let submission = null;
   let deleting = false;
   let screenBeforeAbout = "welcome-screen";
@@ -31,6 +33,8 @@
   }
 
   function openPrivacy() {
+    $("#session-choice").hidden = !eligibilityConfirmed || Boolean(submission);
+    $("#withdraw-consent").hidden = !savingConsent;
     const dialog = $("#privacy-dialog");
     if (typeof dialog.showModal === "function") dialog.showModal();
   }
@@ -52,9 +56,18 @@
   }
 
   function beginFlow() {
+    eligibilityConfirmed = true;
+    savingConsent = true;
+    $("#withdraw-status").textContent = "";
     updateSavingChoice();
     showScreen("intro-screen");
-    window.setTimeout(() => $("#eligibility").focus(), 50);
+    $("#intro-title").focus({ preventScroll: true });
+  }
+
+  function returnToStart() {
+    showScreen("welcome-screen");
+    $("#start-area").scrollIntoView({ block: "center" });
+    $("#start-button").focus({ preventScroll: true });
   }
 
   function renderQuestion() {
@@ -66,7 +79,7 @@
     $("#question-text").textContent = question.text;
     $("#question-back").textContent = currentQuestion === 0 ? "Instructions" : "Back";
     $("#question-next").textContent = currentQuestion === questions.length - 1
-      ? ($("#data-consent").checked && !submission ? "Save & see results" : "See results") : "Next";
+      ? (savingConsent && !submission ? "Save & see results" : "See results") : "Next";
 
     const responseContainer = $("#response-options");
     responseContainer.replaceChildren();
@@ -164,11 +177,12 @@
   }
 
   function updateSavingChoice() {
-    const optedIn = $("#data-consent").checked;
-    $("#intro-continue").disabled = !$("#eligibility").checked;
-    $("#intro-continue").textContent = optedIn ? "Continue with saving enabled" : "Continue without saving";
+    const optedIn = savingConsent;
+    $("#intro-continue").disabled = !eligibilityConfirmed;
+
     $("#saving-label").textContent = optedIn ? "Saving enabled at the final step." : "Answers stay on this page.";
     $("#change-consent").hidden = Boolean(submission);
+    $("#withdraw-consent").hidden = !savingConsent || Boolean(submission);
   }
 
   function renderStorageStatus() {
@@ -189,7 +203,7 @@
     $("#delete-current").disabled = saveState === "saving" || deleting;
     $("#edit-answers").disabled = Boolean(submission) && saveState !== "deleted";
     $("#start-over").disabled = saveState === "saving" || deleting;
-    $("#data-consent").disabled = Boolean(submission);
+
     updateSavingChoice();
   }
 
@@ -220,8 +234,8 @@
   }
 
   async function submitContribution() {
-    if (!["not-started", "uncertain"].includes(saveState) || deleting || !$("#data-consent").checked
-        || !$("#eligibility").checked || answers.some((answer) => answer === null)) return;
+    if (!["not-started", "uncertain"].includes(saveState) || deleting || !savingConsent
+        || !eligibilityConfirmed || answers.some((answer) => answer === null)) return;
     if (!submission) {
       const bytes = crypto.getRandomValues(new Uint8Array(32));
       submission = {
@@ -262,7 +276,7 @@
       status.textContent = "Deletion complete. No saved answers remain for this code. Provider backups and logs expire separately.";
       if (submission && code === submission.deletion_code) {
         saveState = "deleted";
-        $("#data-consent").checked = false;
+        savingConsent = false;
       }
       $("#deletion-code").value = "";
     } catch {
@@ -329,11 +343,12 @@
     currentQuestion = 0;
     saveState = "not-started";
     submission = null;
-    $("#eligibility").checked = false;
+    eligibilityConfirmed = false;
     $("#intro-continue").disabled = true;
-    $("#data-consent").checked = false;
-    $("#data-consent").disabled = false;
+    savingConsent = false;
+
     $("#delete-status").textContent = "";
+    $("#withdraw-status").textContent = "";
     $("#deletion-code").value = "";
     renderStorageStatus();
     showScreen("welcome-screen");
@@ -354,11 +369,11 @@
     $("#start-button").addEventListener("click", beginFlow);
     $("#read-questions-button").addEventListener("click", () => showScreen("all-questions-screen"));
     $("#questions-home").addEventListener("click", () => showScreen("welcome-screen"));
-    $("#questions-start").addEventListener("click", beginFlow);
+    $("#questions-start").addEventListener("click", returnToStart);
     $("#intro-back").addEventListener("click", () => showScreen("welcome-screen"));
-    $("#eligibility").addEventListener("change", updateSavingChoice);
+
     $("#intro-continue").addEventListener("click", () => {
-      if (!$("#eligibility").checked) return;
+      if (!eligibilityConfirmed) return;
       showScreen("quiz-screen");
       renderQuestion();
     });
@@ -372,7 +387,7 @@
       if (answers[currentQuestion] === null) return;
       if (currentQuestion === questions.length - 1) {
         renderResults();
-        if ($("#data-consent").checked && !submission) void submitContribution();
+        if (savingConsent && !submission) void submitContribution();
         return;
       }
       currentQuestion += 1;
@@ -384,8 +399,15 @@
       showScreen("quiz-screen");
       renderQuestion();
     });
-    $("#data-consent").addEventListener("change", updateSavingChoice);
-    $("#change-consent").addEventListener("click", beginFlow);
+
+    $("#change-consent").addEventListener("click", openPrivacy);
+    $("#withdraw-consent").addEventListener("click", () => {
+      if (submission) return;
+      savingConsent = false;
+      updateSavingChoice();
+      $("#withdraw-status").textContent = "Saving consent withdrawn. You can finish and see your result without saving.";
+      if (!$("#quiz-screen").hidden) renderQuestion();
+    });
     $("#submit-answers").addEventListener("click", submitContribution);
     $("#delete-response").addEventListener("click", deleteResponse);
     $("#delete-current").addEventListener("click", () => {

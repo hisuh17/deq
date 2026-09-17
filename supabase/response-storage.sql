@@ -1,5 +1,6 @@
 -- DumEQ response-set storage. Apply after schema.sql; legacy aggregate data is unchanged.
--- Only the new v2 consent authorises storing a complete response set.
+-- v2 (checkbox) and v3 (explicit start button) consent authorise complete response sets.
+-- Keep v2 accepted for already-open pages; never relabel earlier consent records.
 create schema if not exists private;
 
 create table if not exists private.dumeq_responses (
@@ -12,11 +13,15 @@ create table if not exists private.dumeq_responses (
     and 0 <= all(answer_values) and 5 >= all(answer_values)
   ),
   questionnaire_version text not null check (questionnaire_version = 'deq-19-v1'),
-  consent_version text not null check (consent_version = '2026-09-17-v2'),
+  consent_version text not null check (consent_version in ('2026-09-17-v2', '2026-09-17-v3')),
   explicit_consent boolean not null check (explicit_consent),
   consent_date date not null default (now() at time zone 'UTC')::date,
   expires_on date not null default (((now() at time zone 'UTC')::date + interval '12 months')::date)
 );
+
+alter table private.dumeq_responses drop constraint if exists dumeq_responses_consent_version_check;
+alter table private.dumeq_responses add constraint dumeq_responses_consent_version_check
+  check (consent_version in ('2026-09-17-v2', '2026-09-17-v3'));
 
 -- Contains no answers. Blocks delayed requests/retries from recreating a deleted response.
 create table if not exists private.dumeq_withdrawals (
@@ -43,7 +48,8 @@ begin
   end if;
   if explicit_consent is distinct from true
      or questionnaire_version is distinct from 'deq-19-v1'
-     or consent_version is distinct from '2026-09-17-v2' then
+     or consent_version is null
+     or consent_version not in ('2026-09-17-v2', '2026-09-17-v3') then
     raise exception 'Current explicit consent is required';
   end if;
   if answer_values is null or array_ndims(answer_values) is distinct from 1

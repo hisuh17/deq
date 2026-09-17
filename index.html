@@ -13,10 +13,10 @@
     <meta name="twitter:card" content="summary">
     <title>Dummies Experience Questionnaire</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="styles.css">
-    <script src="config.js" defer></script>
-    <script src="questions.js" defer></script>
-    <script src="app.js" defer></script>
+    <link rel="stylesheet" href="styles.css?v=20260917-3">
+    <script src="config.js?v=20260917-3" defer></script>
+    <script src="questions.js?v=20260917-3" defer></script>
+    <script src="app.js?v=20260917-3" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -37,9 +37,15 @@
           <h1 id="hero-title"><span>Dummies</span><span>Experience</span><span>Questionnaire</span></h1>
           <p class="subtitle">A Standardized Measure of Psychedelic-Induced Foolishness.</p>
           <p class="meta-line">19 items <span>•</span> 6 domains <span>•</span> 1 question: how dumb did it get?</p>
-          <div class="hero-actions">
-            <button class="primary-button" id="start-button" type="button">Begin assessment <span aria-hidden="true">→</span></button>
-            <button class="secondary-button" id="read-questions-button" type="button">Read all questions</button>
+          <div class="start-area" id="start-area">
+            <div class="hero-actions">
+              <button class="primary-button" id="start-button" type="button" aria-describedby="start-consent">Agree &amp; Begin Assessment <span aria-hidden="true">→</span></button>
+            </div>
+            <div class="start-notice" id="start-consent">
+              <p>By starting, I confirm I’m 18+ and past the acute effects. I explicitly consent to Hyungil Suh storing my 19 answers, including sensitive health information, for up to 12 months for entertainment and website improvement. No names or emails collected.</p>
+              <button class="text-button" id="privacy-open-intro" type="button">Full privacy notice &amp; deletion options <span aria-hidden="true">↗</span></button>
+            </div>
+            <button class="text-button read-questions-link" id="read-questions-button" type="button">Read all 19 questions →</button>
           </div>
         </div>
         <figure class="hero-art" aria-hidden="true">
@@ -50,33 +56,13 @@
       </section>
 
       <section class="screen intro-screen" id="intro-screen" aria-labelledby="intro-title" hidden>
-        <div class="paper-card narrow-card">
-          <p class="eyebrow">Before you begin</p>
-          <h2 id="intro-title">Think of one past experience.</h2>
-          <p>Looking back on the entirety of that experience, rate how much you experienced each phenomenon. Use the same experience for all 19 questions.</p>
-          <ul class="plain-list">
-            <li>You must answer every question to generate a result.</li>
-            <li>Your answers stay in this page until you finish. Incomplete answers are never submitted.</li>
-            <li>Saving is optional. You get the same result if you leave the consent box unticked.</li>
-          </ul>
-          <label class="eligibility-check">
-            <input id="eligibility" type="checkbox">
-            <span>I confirm that I am 18 or older and am no longer experiencing acute effects.</span>
-          </label>
-          <div class="consent-intro">
-            <h3>A small data decision.</h3>
-            <p><strong>We do not collect direct identifiers such as your name or email address through this questionnaire.</strong> If you opt in, your 19 answers are stored together as one response set for entertainment and improving this website, for up to 12 months. Individual responses are not published.</p>
-            <p>Your answers may reveal sensitive information about psychedelic experiences, health or behaviour. An answer pattern could potentially be linked with access logs or other information, so we cannot promise complete anonymity. GitHub and Supabase may process IP addresses and technical logs.</p>
-            <label class="consent-check">
-              <input id="data-consent" type="checkbox" aria-describedby="consent-help">
-              <span><strong>Optional:</strong> I explicitly consent to Hyungil Suh receiving, storing and using my complete set of 19 answers, including any sensitive health-related information they reveal, for entertainment and improving this website. I understand the identification risk and that I can withdraw using my deletion code.</span>
-            </label>
-            <p class="quiet-note" id="consent-help">If ticked, your answers are sent when you press “Save &amp; see results” after question 19. You can change your choice before then. This is not consent for academic research, publication, marketing or AI training.</p>
-            <button class="text-button" id="privacy-open-intro" type="button">Full privacy notice &amp; deletion options</button>
-          </div>
+        <div class="paper-card narrow-card recall-card">
+          <p class="eyebrow">A small trip down memory lane</p>
+          <h2 id="intro-title" tabindex="-1">Think of a psychedelic experience you’d like to put to the DumEQ test.</h2>
+          <p>Keep that experience in mind as you answer all 19 questions.</p>
           <div class="button-row">
             <button class="secondary-button" id="intro-back" type="button">Back</button>
-            <button class="primary-button" id="intro-continue" type="button" disabled>Continue</button>
+            <button class="primary-button" id="intro-continue" type="button">I've got it. Let's begin. <span aria-hidden="true">→</span></button>
           </div>
         </div>
       </section>
@@ -84,7 +70,7 @@
       <section class="screen quiz-screen" id="quiz-screen" aria-labelledby="question-text" hidden>
         <div class="quiz-shell">
           <div class="progress-block">
-            <div class="saving-choice"><span id="saving-label">Answers stay on this page.</span><button class="text-button" id="change-consent" type="button">Change choice</button></div>
+            <div class="saving-choice"><span id="saving-label">Answers stay on this page.</span><button class="text-button" id="change-consent" type="button">Privacy &amp; choices</button></div>
             <div class="progress-meta">
               <span id="domain-label">Domain</span>
               <span id="progress-label">Question 1 of 19</span>
@@ -199,7 +185,7 @@
           <div id="all-questions-list"></div>
           <div class="button-row sticky-actions">
             <button class="secondary-button" id="questions-home" type="button">Back</button>
-            <button class="primary-button" id="questions-start" type="button">Begin assessment</button>
+            <button class="primary-button" id="questions-start" type="button">Back to start</button>
           </div>
         </div>
       </section>
@@ -213,7 +199,7 @@
     <dialog id="privacy-dialog" aria-labelledby="privacy-title">
       <form method="dialog" class="dialog-shell">
         <button class="dialog-close" value="close" aria-label="Close privacy notice">×</button>
-        <p class="eyebrow">Privacy notice · 17 September 2026 · v2</p>
+        <p class="eyebrow">Privacy notice · 17 September 2026 · v3</p>
         <h2 id="privacy-title">What happens to your answers</h2>
 
         <h3>Who operates this site</h3>
@@ -221,11 +207,11 @@
 
         <h3>What is processed</h3>
         <p><strong>We do not collect direct identifiers such as your name or email address through this questionnaire.</strong> There is no account, demographic form, free-text field, advertising or behavioural analytics. The application does not use cookies or browser storage to keep answers. If you contact us by email, your email address and message will of course be received to handle your request.</p>
-        <p>Without saving consent, answers remain in the current page and disappear when it is closed or reloaded. With your explicit consent at the start, pressing “Save &amp; see results” sends all 19 numerical answers together to Supabase. We retain this response set, the questionnaire and consent versions, the consent/submission date (not the exact time), an expiry date, a random response ID and a one-way hash of your deletion code. No substance name, dose, location or event date is requested.</p>
+        <p>Without saving consent, answers remain in the current page and disappear when it is closed or reloaded. If you choose “Agree &amp; Begin Assessment”, pressing “Save &amp; see results” sends all 19 numerical answers together to Supabase. We retain this response set, the questionnaire and consent versions, the consent/submission date (not the exact time), an expiry date, a random response ID and a one-way hash of your deletion code. No substance name, dose, location or event date is requested.</p>
         <p>Answers can reveal sensitive information about psychedelic experiences, health and behaviour. Removing names does not make a response necessarily anonymous: patterns could be combined with access logs or other information to identify someone. We treat saved responses as potentially identifiable and do not attempt to identify respondents or join their answers to access logs.</p>
 
         <h3>Why and on what basis</h3>
-        <p>The purpose is to understand answer patterns and improve this entertainment website. We rely on your optional consent under UK/EU GDPR Article 6(1)(a) and explicit consent under Article 9(2)(a) for any health-related special-category information. The saving checkbox is off by default. Refusing or withdrawing does not affect access to your result. Scores are calculated in your browser for entertainment; they are not used to make decisions about you.</p>
+        <p>The purpose is to understand answer patterns and improve this entertainment website. We rely on your optional consent under UK/EU GDPR Article 6(1)(a) and explicit consent under Article 9(2)(a) for any health-related special-category information. Saving is enabled only when you choose “Agree &amp; Begin Assessment”. You can withdraw saving consent before finishing via Privacy &amp; choices and still see your result. Scores are calculated in your browser for entertainment; they are not used to make decisions about you.</p>
 
         <h3>Hosting logs and international processing</h3>
         <p>GitHub Pages hosts the website. Supabase stores saved responses in its London database region. Individual responses are accessible to the site operator and necessary hosting providers, not to other visitors or the public. GitHub and Supabase may process IP addresses, browser information, request times, security cookies and technical logs. The application does not copy those identifiers into the response table.</p>
@@ -236,8 +222,12 @@
         <p>Saved responses expire after 12 months and are removed by an automatic daily cleanup. They will not be used for academic research, a paper, marketing or AI training. Future research would need a separate route, appropriate review and fresh information and consent. Earlier versions of this site accepted aggregate-only contributions; those cannot be reconstructed as individual responses.</p>
 
         <h3>Your choices</h3>
-        <p>You may use the full questionnaire without saving. To request access, correction, restriction, portability or help deleting a response, contact the operator, ideally with your deletion code. We only ask for information needed to handle the request. You may complain to the <a href="https://ico.org.uk/make-a-complaint/" target="_blank" rel="noopener noreferrer">UK Information Commissioner's Office</a> or your local EU data-protection authority.</p>
+        <p>You can withdraw saving consent for this session below before finishing, or delete a submitted response using its deletion code. To request access, correction, restriction, portability or help deleting a response, contact the operator, ideally with your deletion code. We only ask for information needed to handle the request. You may complain to the <a href="https://ico.org.uk/make-a-complaint/" target="_blank" rel="noopener noreferrer">UK Information Commissioner's Office</a> or your local EU data-protection authority.</p>
 
+        <div class="session-choice" id="session-choice" hidden>
+          <button class="secondary-button" id="withdraw-consent" type="button">Withdraw saving consent for this session</button>
+          <p class="quiet-note" id="withdraw-status" role="status"></p>
+        </div>
         <div class="delete-panel">
           <h3>Delete a saved response</h3>
           <label for="deletion-code">Paste the deletion code you kept</label>

@@ -2,10 +2,10 @@
 
 Static GitHub Pages website: https://hisuh17.github.io/deq/
 
-## Current data flow (consent v2)
+## Current data flow (consent v3)
 
 - The 19-question experience runs in browser memory. No account, name, email, demographics, free text, answer cookies or local storage.
-- Optional explicit saving consent is collected **before** question 1, separately from the adult/past-experience confirmation. The checkbox starts unchecked. The same result is available without saving.
+- The **Agree & Begin Assessment** button confirms adult/past-effects eligibility and the compact saving-consent statement **before** question 1. A full privacy notice is linked directly below it. Saving consent can be withdrawn through **Privacy & choices** before completion; the same local result remains available. No checkbox or second start button is used.
 - Nothing is sent until all 19 questions are answered and the visitor presses **Save & see results**. The browser sends one complete response set to `submit_dumeq_response`.
 - `private.dumeq_responses` retains the 19 answers together, questionnaire/consent versions, explicit consent, a calendar date, expiry date, random record ID and SHA-256 deletion-code hash. No exact submission timestamp, IP address or user-agent column is stored.
 - A cryptographically random 256-bit deletion code is generated per response. The visitor can copy/download it and delete the response through Privacy & data. The raw code is not stored in the response table, cookies or local storage.
@@ -25,6 +25,8 @@ The current consent covers entertainment and website improvement only, **not aca
 3. Use only the publishable key in `config.js`; never publish a secret/service-role key.
 4. Verify `private` is not an exposed API schema, anonymous direct reads are blocked, current consent is required, retries produce one row, deletion removes it, and the retention job is active.
 5. Run Supabase security/performance advisors. RLS-with-no-policy notices here are intentional deny-by-default access; the expiry indexes are for daily cleanup even before enough records exist for them to be useful.
+
+Consent version `2026-09-17-v3` identifies the explicit start-button flow. Version `2026-09-17-v2` remains accepted for already-open checkbox-flow pages; existing rows retain their original consent version.
 
 Legacy `deq_answer_counts` / `deq_totals` and the v1 `submit_deq_response` endpoint remain aggregate-only for already-open old pages. No historical individual response sets are reconstructed, and the new API does not increment legacy totals.
 

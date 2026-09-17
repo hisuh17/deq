@@ -10,21 +10,26 @@ function page(responder = async () => ({ ok: true, json: async () => 'saved' }))
   w.scrollTo = () => {};
   w.HTMLElement.prototype.scrollIntoView = () => {};
   w.HTMLDialogElement.prototype.showModal = function () { this.open = true; };
+  w.HTMLDialogElement.prototype.close = function () { this.open = false; };
   w.fetch = async (url, options) => { calls.push({url, ...options, payload: JSON.parse(options.body)}); return responder(url, options, calls.length); };
   for (const file of ['config.js', 'questions.js', 'app.js']) w.eval(fs.readFileSync(path.join(root, file), 'utf8'));
   const $ = s => w.document.querySelector(s);
   const click = s => $(s).click();
   const check = (s, value) => { $(s).checked = value; $(s).dispatchEvent(new w.Event('change', {bubbles:true})); };
-  function begin(consent) { click('#start-button'); check('#eligibility', true); check('#data-consent', consent); click('#intro-continue'); }
+  function begin(consent) { click('#start-button'); if (!consent) { click('#privacy-open-top'); click('#withdraw-consent'); $('#privacy-dialog').close(); } click('#intro-continue'); }
   function answer(value) { check(`#response-options input[value="${value}"]`, true); click('#question-next'); }
   return { dom, w, $, click, check, begin, answer, calls };
 }
 const tick = () => new Promise(resolve => setImmediate(resolve));
 (async () => {
   let p = page();
-  assert.equal(p.$('#data-consent').checked, false);
-  p.click('#start-button');
-  assert.equal(p.$('#intro-continue').disabled, true);
+  assert.equal(p.$('#private-start-button'), null);
+  assert.equal(p.$('#data-consent'), null);
+  p.click('#intro-continue');
+  assert.equal(p.$('#quiz-screen').hidden, true, 'Questions require an explicit start action');
+  p.click('#read-questions-button'); p.click('#questions-start');
+  assert.equal(p.$('#welcome-screen').hidden, false, 'Read-only route must return to the consent notice');
+  assert.equal(p.calls.length, 0);
   p.begin(false);
   p.w.document.dispatchEvent(new p.w.KeyboardEvent('keydown', {key:' '}));
   assert.equal(p.$('#question-next').disabled, true, 'Space must not select answer 0');
@@ -35,7 +40,7 @@ const tick = () => new Promise(resolve => setImmediate(resolve));
   p.dom.window.close();
 
   p = page(); p.begin(true); p.answer(2);
-  p.click('#change-consent'); p.check('#data-consent', false); p.click('#intro-continue');
+  p.click('#change-consent'); p.click('#withdraw-consent'); p.$('#privacy-dialog').close();
   assert.match(p.$('#progress-label').textContent, /Question 2 /);
   for(let i=1;i<19;i++) p.answer(2);
   assert.equal(p.calls.length, 0, 'Withdrawal before completion = no transmission');
@@ -53,7 +58,7 @@ const tick = () => new Promise(resolve => setImmediate(resolve));
   const sent = p.calls[0].payload;
   assert.deepEqual(sent.answer_values, Array(19).fill(3));
   assert.equal(sent.explicit_consent, true);
-  assert.equal(sent.consent_version, '2026-09-17-v2');
+  assert.equal(sent.consent_version, '2026-09-17-v3');
   assert.match(sent.deletion_code, /^[a-f0-9]{64}$/);
   assert.equal(p.calls[0].credentials, 'omit');
   finish({ok:true, json:async()=>'saved'}); await tick();
@@ -75,7 +80,7 @@ const tick = () => new Promise(resolve => setImmediate(resolve));
   p.click('#delete-current'); p.click('#delete-response'); await tick();
   assert.equal(p.$('#storage-title').textContent, 'Your saved response has been deleted.');
   assert.deepEqual(p.calls[2].payload, {deletion_code:p.calls[0].payload.deletion_code});
-  assert.equal(p.$('#data-consent').checked, false);
+  assert.match(p.$('#saving-label').textContent, /stay on this page/);
   p.dom.window.close();
-  console.log('PASS: optional upfront consent, eligibility gate, 19-answer completion, revocation, no partial/opt-out requests, saved payload, in-flight controls, receipt, reset, idempotent retry, deletion UI, no browser storage.');
+  console.log('PASS: explicit start consent, eligibility gate, 19-answer completion, revocation, no partial/opt-out requests, saved payload, in-flight controls, receipt, reset, idempotent retry, deletion UI, no browser storage.');
 })().catch(err=>{console.error(err);process.exitCode=1;});
