@@ -168,7 +168,7 @@
       submitted = true;
       $("#data-consent").disabled = true;
       button.textContent = "Contribution added";
-      status.textContent = "Thank you. Your answers were added to the aggregate counts; no individual DEQ response row was retained.";
+      status.textContent = "Thank you. Your answers were added to the aggregate counts; no individual DumEQ response row was retained.";
     } catch (error) {
       console.error(error);
       button.disabled = !$("#data-consent").checked;
