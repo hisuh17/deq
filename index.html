@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#090a0f">
+    <meta name="description" content="An entirely unofficial, satirical questionnaire about psychedelic experiences that did not go to plan.">
+    <meta property="og:title" content="Dummies Experience Questionnaire">
+    <meta property="og:description" content="19 items • 6 domains • 1 question: how dumb did it get? An unofficial parody.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://hisuh17.github.io/deq/">
+    <meta name="twitter:card" content="summary">
+    <title>Dummies Experience Questionnaire</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="config.js" defer></script>
+    <script src="questions.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="DEQ home">DEQ</a>
+      <button class="text-button" id="privacy-open-top" type="button">Privacy</button>
+    </header>
+
+    <main id="main">
+      <section class="screen hero is-active" id="welcome-screen" aria-labelledby="hero-title">
+        <div class="hero-grid" aria-hidden="true"></div>
+        <div class="hero-copy">
+          <p class="eyebrow">Officially unofficial • Form 404-B</p>
+          <h1 id="hero-title"><span>Dummies</span><span>Experience</span><span>Questionnaire</span></h1>
+          <p class="subtitle">A Standardized Measure of Psychedelic-Induced Foolishness.</p>
+          <p class="meta-line">19 items <span>•</span> 6 domains <span>•</span> 1 question: how dumb did it get?</p>
+          <p class="parody-note">Satirical parody. It is neither standardised nor a validated psychological, clinical, or research instrument.</p>
+          <div class="hero-actions">
+            <button class="primary-button" id="start-button" type="button">Begin assessment <span aria-hidden="true">→</span></button>
+            <button class="secondary-button" id="read-questions-button" type="button">Read all questions</button>
+          </div>
+          <p class="quiet-note">For adults reflecting on a past experience after the acute effects have ended. Starting does not send or save anything.</p>
+        </div>
+        <div class="stamp" aria-hidden="true">
+          <span>Department of</span>
+          <strong>BAD IDEAS</strong>
+          <span>Certified copy</span>
+        </div>
+      </section>
+
+      <section class="screen intro-screen" id="intro-screen" aria-labelledby="intro-title" hidden>
+        <div class="paper-card narrow-card">
+          <p class="eyebrow">Before you begin</p>
+          <h2 id="intro-title">Think of one past experience.</h2>
+          <p>Looking back on the entirety of that experience, rate how much you experienced each phenomenon. Use the same experience for all 19 questions.</p>
+          <ul class="plain-list">
+            <li>You must answer every question to generate a result.</li>
+            <li>Your answers stay in this browser unless you separately choose to contribute them after seeing your result.</li>
+            <li>You can see your result without contributing anything.</li>
+          </ul>
+          <label class="eligibility-check">
+            <input id="eligibility" type="checkbox">
+            <span>I confirm that I am 18 or older and am no longer experiencing acute effects.</span>
+          </label>
+          <div class="button-row">
+            <button class="secondary-button" id="intro-back" type="button">Back</button>
+            <button class="primary-button" id="intro-continue" type="button" disabled>Continue</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen quiz-screen" id="quiz-screen" aria-labelledby="question-text" hidden>
+        <div class="quiz-shell">
+          <div class="progress-block">
+            <div class="progress-meta">
+              <span id="domain-label">Domain</span>
+              <span id="progress-label">Question 1 of 19</span>
+            </div>
+            <div class="progress-track" aria-hidden="true"><span id="progress-fill"></span></div>
+          </div>
+
+          <div class="question-card">
+            <p class="question-number" id="question-number">01</p>
+            <h2 id="question-text"></h2>
+            <fieldset class="response-fieldset">
+              <legend>How strongly did this apply?</legend>
+              <div class="response-grid" id="response-options"></div>
+            </fieldset>
+          </div>
+
+          <div class="quiz-controls">
+            <button class="secondary-button" id="question-back" type="button">Back</button>
+            <p id="answer-prompt" role="status">Choose one response to continue.</p>
+            <button class="primary-button" id="question-next" type="button" disabled>Next</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen result-screen" id="result-screen" aria-labelledby="result-title" hidden>
+        <div class="result-header">
+          <p class="eyebrow">Form DEQ–19 / unofficial copy</p>
+          <h2 id="result-title">Your Unofficial Incident Report</h2>
+          <p>This is a playful summary of your answers, not a measure of intelligence, diagnosis, risk assessment, or comparison with other people.</p>
+        </div>
+
+        <div class="score-card">
+          <div>
+            <p class="score-label">Unofficial incident index</p>
+            <p class="score-value"><span id="total-score">0</span><small>/95</small></p>
+          </div>
+          <div class="score-ring" id="score-ring" aria-label="0 per cent"><span id="score-percent">0%</span></div>
+        </div>
+
+        <div class="domain-results" id="domain-results"></div>
+
+        <details class="answer-review">
+          <summary>Review all 19 answers</summary>
+          <ol id="answer-list"></ol>
+        </details>
+
+        <div class="contribution-card" id="contribution-card">
+          <p class="eyebrow">Optional community contribution</p>
+          <h3>Add these answers to anonymous community totals?</h3>
+          <p>The database keeps only six running counts for each question. It does not retain your 19 answers together as an individual response, and it receives no name, email, free text, substance, dose, location, or exact event date.</p>
+          <label class="consent-check">
+            <input id="data-consent" type="checkbox">
+            <span>I am 18 or older and explicitly consent to these 19 answers being transmitted once and immediately added to aggregate DEQ community totals for entertainment and site improvement. I understand that GitHub and Supabase may process IP address and browser information in security logs; that my individual response pattern is not retained in the DEQ database; and that an aggregated contribution cannot later be identified or withdrawn.</span>
+          </label>
+          <button class="primary-button" id="submit-answers" type="button" disabled>Contribute to community totals</button>
+          <p class="submission-status" id="submission-status" role="status"></p>
+          <button class="text-button privacy-inline" id="privacy-open-result" type="button">Read the full privacy notice</button>
+        </div>
+
+        <div class="result-actions">
+          <button class="secondary-button" id="edit-answers" type="button">Review answers</button>
+          <button class="secondary-button" id="share-site" type="button">Share this questionnaire</button>
+          <button class="text-button" id="start-over" type="button">Start over</button>
+        </div>
+      </section>
+
+      <section class="screen all-questions-screen" id="all-questions-screen" aria-labelledby="all-questions-title" hidden>
+        <div class="paper-card wide-card">
+          <p class="eyebrow">Read-only copy</p>
+          <h2 id="all-questions-title">All 19 questions</h2>
+          <p>Reading the questionnaire does not save or submit anything.</p>
+          <div id="all-questions-list"></div>
+          <div class="button-row sticky-actions">
+            <button class="secondary-button" id="questions-home" type="button">Back</button>
+            <button class="primary-button" id="questions-start" type="button">Begin assessment</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>DEQ is an unofficial parody for entertainment. It does not endorse or encourage the use of controlled substances.</p>
+      <button class="text-button" id="privacy-open-footer" type="button">Privacy &amp; data</button>
+    </footer>
+
+    <dialog id="privacy-dialog" aria-labelledby="privacy-title">
+      <form method="dialog" class="dialog-shell">
+        <button class="dialog-close" value="close" aria-label="Close privacy notice">×</button>
+        <p class="eyebrow">Privacy notice · version 17 September 2026</p>
+        <h2 id="privacy-title">What happens to your answers</h2>
+
+        <h3>Who operates this site</h3>
+        <p>Hyungil Suh is the site operator and data controller for the optional community contribution. Contact: <a href="mailto:ilgyu86@gmail.com">ilgyu86@gmail.com</a>. This entertainment site does not represent or imply endorsement by the University of Exeter.</p>
+
+        <h3>What is processed</h3>
+        <p>The questionnaire runs in your browser. Until you choose to contribute, the 19 answers exist only in the current page and are cleared when you reload or close it. The site uses no answer cookies, local storage, advertising, behavioural analytics, account, demographic form, or free-text field.</p>
+        <p>If you opt in, the 19 answer values are sent once to Supabase and immediately added to per-question aggregate counts. The DEQ database does not create or keep a row containing your individual response pattern. It does not receive your name, email, substance, dose, location, narrative, or exact event date.</p>
+
+        <h3>Why and on what basis</h3>
+        <p>The only purpose is to maintain anonymous community totals and improve this entertainment website. Where the brief transmission is personal data, the operator relies on your explicit, optional consent under Article 6(1)(a), and Article 9(2)(a) if an answer is treated as health-related information. Refusing does not affect access to your result.</p>
+
+        <h3>Hosting logs and international processing</h3>
+        <p>GitHub hosts the website and Supabase receives optional submissions. Like most hosting providers, they may automatically process IP address, browser information, request time, and security metadata in technical logs. The DEQ application does not copy those identifiers into its response counts. Their own retention, security, and international-transfer arrangements are described in their privacy notices.</p>
+
+        <h3>Retention, withdrawal, and reuse</h3>
+        <p>You can decline or withdraw before pressing the contribution button. Once the counts have been incremented, there is no individual DEQ record or identifier that can be found, linked back, or removed. The totals will not be used as research data, in a paper, for marketing, or to train an AI system. A future research project would require a separate route and fresh information and consent.</p>
+
+        <h3>Your choices</h3>
+        <p>You may use the full questionnaire and see the result without contributing. Questions about privacy can be sent to the contact above. UK users may also contact the Information Commissioner’s Office, and EU users may contact their local data-protection authority.</p>
+
+        <p class="legal-note">This notice explains the implemented data flow; it is not legal advice or a claim that consent removes all data-protection obligations.</p>
+        <button class="primary-button dialog-done" value="close">Done</button>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>
