@@ -635,10 +635,57 @@ dialog::backdrop { background: rgba(37, 34, 25, .72); }
 .dialog-close { border: 3px solid var(--line); background: var(--yellow); color: var(--ink); }
 .toast { border: 3px solid var(--line); border-radius: .15rem; background: var(--yellow); color: var(--ink); box-shadow: 5px 5px 0 var(--line); font-weight: 800; }
 
+/* Illustrated field notes */
+.site-nav { display: flex; align-items: center; gap: 1.6rem; }
+.site-nav a { text-decoration: none; }
+.site-nav [aria-current="page"] { color: var(--danger); border-bottom-width: 3px; }
+.hero { grid-template-columns: minmax(0, 1fr) 310px; gap: 1rem; overflow: visible; }
+.hero h1 { font-size: clamp(3.7rem, 7.4vw, 6.7rem); }
+.hero-copy::after { display: none; }
+.hero-art { position: relative; margin: 0; align-self: center; transform: rotate(3deg); }
+.hero-art img { display: block; width: 100%; height: auto; }
+.doodle-note, .hero-art figcaption, .handwritten-note { font-family: "Comic Sans MS", "Marker Felt", cursive; font-weight: 700; }
+.doodle-note { display: inline-block; margin: 0 0 .4rem 1rem; padding: .6rem .8rem; border: 2px solid var(--ink); background: #fff; box-shadow: 3px 3px 0 var(--ink); transform: rotate(-7deg); }
+.hero-art figcaption { max-width: 230px; margin: .5rem auto 0; text-align: center; font-size: .95rem; color: var(--purple); }
+.question-heading { display: grid; grid-template-columns: minmax(0, 1fr) 135px; gap: 1.5rem; align-items: start; }
+.question-illustration { width: 100%; height: auto; margin-top: .8rem; transform: rotate(5deg); pointer-events: none; }
+.result-illustration { float: right; width: 31%; height: auto; margin: 3.2rem 0 1rem 1.5rem; transform: rotate(3deg); }
+.result-header { display: flow-root; }
+.about-screen { padding-top: 3.5rem; }
+.about-topline { display: flex; flex-wrap: wrap; gap: 1rem; align-items: baseline; justify-content: space-between; margin-bottom: 2rem; }
+.about-topline .eyebrow { margin: 0; }
+.about-topline > a { font-size: .85rem; }
+.about-layout { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: clamp(2rem, 5vw, 5rem); align-items: start; padding: 1rem .5rem; }
+.portrait-card { position: relative; margin: 1rem 0 0; padding: .8rem .8rem 0; border: 3px solid var(--ink); background: #fffaf0; box-shadow: 8px 8px 0 var(--ink); transform: rotate(-2deg); }
+.portrait-card::before { content: ""; position: absolute; z-index: 1; top: -1rem; left: 33%; width: 34%; height: 2.2rem; background: rgba(255, 216, 77, .8); border-inline: 2px dashed rgba(23, 21, 15, .15); transform: rotate(7deg); }
+.portrait-card img { display: block; width: 100%; height: auto; border: 1px solid rgba(23, 21, 15, .15); }
+.portrait-card figcaption { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .3rem 1rem; padding: 1rem .2rem; font-family: "Courier New", monospace; font-weight: 900; }
+.portrait-card figcaption span { font-size: .75rem; align-self: center; color: var(--muted); }
+.portrait-sticker { position: absolute; right: -1rem; bottom: 4rem; padding: .6rem .8rem; border: 2px solid var(--ink); background: var(--yellow); color: var(--ink); font: 900 .85rem "Courier New", monospace; box-shadow: 3px 3px 0 var(--ink); transform: rotate(7deg); }
+.handwritten-note { margin: 0 0 .3rem; color: var(--danger); font-size: 2rem; transform: rotate(-4deg); transform-origin: left center; }
+.about-copy h2 { font-family: Impact, Haettenschweiler, "Arial Black", sans-serif; font-size: clamp(3.7rem, 7vw, 6rem); line-height: .95; letter-spacing: -.025em; }
+.about-copy h2 span { color: var(--purple); text-shadow: 2px 2px 0 #fff; }
+.about-copy > p:not(.handwritten-note, .profile-source) { line-height: 1.8; }
+.about-lead { font-size: 1.22rem; font-weight: 800; }
+.about-copy a:not(.primary-button) { color: var(--purple); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.connect-card { margin-top: 2rem; padding: 1.4rem; border: 3px solid var(--ink); background: #fff8d7; box-shadow: 5px 5px 0 var(--ink); transform: rotate(.6deg); }
+.connect-card h3 { font-size: 1.5rem; }
+.connect-card p { margin: .5rem 0 1.2rem; color: var(--muted); }
+.contact-links { display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; align-items: center; }
+.contact-links .primary-button { display: inline-flex; gap: 1.5rem; align-items: center; text-decoration: none; }
+.email-link { font-weight: 800; overflow-wrap: anywhere; }
+.profile-source { margin-top: 1.5rem; color: var(--muted); font-size: .8rem; }
+
 @media (max-width: 800px) {
   .hero { min-height: 680px; grid-template-columns: 1fr; }
   h1 { font-size: clamp(3.3rem, 13vw, 6rem); }
   .hero-copy::before { right: 0; }
+  .hero h1 { font-size: clamp(3.3rem, 10vw, 6rem); }
+  .hero-art { width: min(270px, 70%); justify-self: center; margin: .5rem 0 1.5rem; }
+  .question-heading { grid-template-columns: minmax(0, 1fr) 100px; gap: 1rem; }
+  .about-layout { grid-template-columns: 1fr; gap: 3rem; }
+  .portrait-card { max-width: 390px; width: calc(100% - 1rem); justify-self: center; }
+  .about-copy { max-width: 620px; margin: 0 auto; }
 }
 
 @media (max-width: 520px) {
@@ -655,4 +702,18 @@ dialog::backdrop { background: rgba(37, 34, 25, .72); }
   .question-card h2 { padding-left: 0; }
   .response-option { min-height: 6.1rem; }
   .result-header::after { top: 1rem; right: 1rem; font-size: .8rem; }
+  .site-nav { gap: .9rem; font-size: .8rem; }
+  .brand { font-size: 1.1rem; }
+  .hero h1 { font-size: clamp(2.4rem, 10.2vw, 3.2rem); line-height: .9; }
+  .hero-art { width: 215px; }
+  .question-heading { grid-template-columns: 1fr; position: relative; padding-top: .4rem; }
+  .question-illustration { position: absolute; width: 66px; right: .5rem; top: -.5rem; margin: 0; }
+  .question-number { margin-bottom: 2.8rem; }
+  .result-illustration { float: none; display: block; width: 150px; margin: 2rem auto 1rem; }
+  .result-screen { width: calc(100% - 2rem); }
+  .about-screen { padding-inline: .5rem; }
+  .about-layout { padding-inline: .25rem; }
+  .about-copy h2 { font-size: 3.5rem; }
+  .about-copy > p:not(.handwritten-note, .profile-source) { line-height: 1.7; }
+  .connect-card { padding: 1.1rem; }
 }

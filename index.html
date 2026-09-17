@@ -22,7 +22,10 @@
 
     <header class="site-header">
       <a class="brand" href="./" aria-label="DumEQ home">DumEQ</a>
-      <button class="text-button" id="privacy-open-top" type="button">Privacy</button>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a class="text-button" id="about-link" href="#about">About Hyungil</a>
+        <button class="text-button" id="privacy-open-top" type="button">Privacy</button>
+      </nav>
     </header>
 
     <main id="main">
@@ -33,18 +36,16 @@
           <h1 id="hero-title"><span>Dummies</span><span>Experience</span><span>Questionnaire</span></h1>
           <p class="subtitle">A Standardized Measure of Psychedelic-Induced Foolishness.</p>
           <p class="meta-line">19 items <span>•</span> 6 domains <span>•</span> 1 question: how dumb did it get?</p>
-          <p class="parody-note">Satirical parody. It is neither standardised nor a validated psychological, clinical, or research instrument.</p>
           <div class="hero-actions">
             <button class="primary-button" id="start-button" type="button">Begin assessment <span aria-hidden="true">→</span></button>
             <button class="secondary-button" id="read-questions-button" type="button">Read all questions</button>
           </div>
-          <p class="quiet-note">For adults reflecting on a past experience after the acute effects have ended. Starting does not send or save anything.</p>
         </div>
-        <div class="stamp" aria-hidden="true">
-          <span>Department of</span>
-          <strong>BAD IDEAS</strong>
-          <span>Certified copy</span>
-        </div>
+        <figure class="hero-art" aria-hidden="true">
+          <div class="doodle-note">Seemed like a good idea.</div>
+          <img src="assets/dumeq-mascot.webp" width="660" height="720" alt="" fetchpriority="high">
+          <figcaption>Confidence: high. Direction: debatable.</figcaption>
+        </figure>
       </section>
 
       <section class="screen intro-screen" id="intro-screen" aria-labelledby="intro-title" hidden>
@@ -79,8 +80,13 @@
           </div>
 
           <div class="question-card">
-            <p class="question-number" id="question-number">01</p>
-            <h2 id="question-text"></h2>
+            <div class="question-heading">
+              <div>
+                <p class="question-number" id="question-number">01</p>
+                <h2 id="question-text"></h2>
+              </div>
+              <img class="question-illustration" src="assets/open-door.webp" width="500" height="600" alt="" aria-hidden="true" loading="lazy">
+            </div>
             <fieldset class="response-fieldset">
               <legend>How strongly did this apply?</legend>
               <div class="response-grid" id="response-options"></div>
@@ -97,6 +103,7 @@
 
       <section class="screen result-screen" id="result-screen" aria-labelledby="result-title" hidden>
         <div class="result-header">
+          <img class="result-illustration" src="assets/incident-pile.webp" width="780" height="520" alt="" aria-hidden="true" loading="lazy">
           <p class="eyebrow">Form DumEQ–19 / unofficial copy</p>
           <h2 id="result-title">Your Unofficial Incident Report</h2>
           <p>This is a playful summary of your answers, not a measure of intelligence, diagnosis, risk assessment, or comparison with other people.</p>
@@ -134,6 +141,37 @@
           <button class="secondary-button" id="edit-answers" type="button">Review answers</button>
           <button class="secondary-button" id="share-site" type="button">Share this questionnaire</button>
           <button class="text-button" id="start-over" type="button">Start over</button>
+        </div>
+      </section>
+
+      <section class="screen about-screen" id="about-screen" aria-labelledby="about-title" hidden>
+        <div class="about-topline">
+          <p class="eyebrow">The human behind DumEQ</p>
+          <a class="text-button" href="#" id="about-back">← Back to the questionnaire</a>
+        </div>
+        <div class="about-layout">
+          <figure class="portrait-card">
+            <img src="assets/hyungil-portrait.webp" width="800" height="1000" alt="Illustrated portrait of Hyungil Suh, with long dark hair and a warm smile, navigating a green paper boat among stories and notes." loading="lazy">
+            <figcaption>Hyungil Suh <span>PhD researcher</span></figcaption>
+            <span class="portrait-sticker" aria-hidden="true">Hello, world!</span>
+          </figure>
+          <article class="about-copy">
+            <p class="handwritten-note">Hello!</p>
+            <h2 id="about-title" tabindex="-1">I'm <span>Hyungil.</span></h2>
+            <p class="about-lead">A researcher trying to make sense of extraordinary experiences.</p>
+            <p>I am a PhD researcher at the <a href="https://www.exeter.ac.uk/research-centres/psychedelic-interdisciplinary-centre/" target="_blank" rel="noopener noreferrer">Exeter Psychedelic Interdisciplinary Centre (EPIC)</a>, within the Department of Psychology at the University of Exeter, supervised by <a href="https://experts.exeter.ac.uk/41893-leor-roseman" target="_blank" rel="noopener noreferrer">Dr Leor Roseman</a>.</p>
+            <p>My research explores how large language models can assist qualitative analysis of large collections of first-hand narratives, helping us better understand psychedelic experiences. I am particularly interested in the social dimensions of psychedelics.</p>
+            <p>To my knowledge, I am one of two Korean researchers working in psychedelics, alongside Aiden Ko at King's College London.</p>
+            <div class="connect-card">
+              <h3>Want to connect?</h3>
+              <p>Let's talk about research, stories, and interesting questions.</p>
+              <div class="contact-links">
+                <a class="primary-button" href="https://www.linkedin.com/in/hyungil-suh/" target="_blank" rel="noopener noreferrer">LinkedIn <span aria-hidden="true">↗</span></a>
+                <a class="email-link" href="mailto:h.suh@exeter.ac.uk">h.suh@exeter.ac.uk <span aria-hidden="true">↗</span></a>
+              </div>
+            </div>
+            <p class="profile-source">A short introduction adapted from my <a href="https://experts.exeter.ac.uk/46952-hyungil-suh/about" target="_blank" rel="noopener noreferrer">University of Exeter profile ↗</a>.</p>
+          </article>
         </div>
       </section>
 

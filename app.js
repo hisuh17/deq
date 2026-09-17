@@ -7,6 +7,7 @@
   const answers = Array(questions.length).fill(null);
   let currentQuestion = 0;
   let submitted = false;
+  let screenBeforeAbout = "welcome-screen";
 
   const $ = (selector) => document.querySelector(selector);
   const screens = [...document.querySelectorAll(".screen")];
@@ -30,6 +31,22 @@
   function openPrivacy() {
     const dialog = $("#privacy-dialog");
     if (typeof dialog.showModal === "function") dialog.showModal();
+  }
+
+  function handleAboutNavigation() {
+    if (window.location.hash === "#about") {
+      const active = screens.find((screen) => !screen.hidden);
+      if (active && active.id !== "about-screen") screenBeforeAbout = active.id;
+      showScreen("about-screen");
+      $("#about-link").setAttribute("aria-current", "page");
+      document.title = "About Hyungil Suh | DumEQ";
+      $("#about-title").focus({ preventScroll: true });
+    } else if (!$("#about-screen").hidden) {
+      showScreen(screenBeforeAbout);
+      $("#about-link").removeAttribute("aria-current");
+      document.title = "Dummies Experience Questionnaire";
+      $("#about-link").focus({ preventScroll: true });
+    }
   }
 
   function beginFlow() {
@@ -235,6 +252,8 @@
     }
 
     renderAllQuestions();
+    window.addEventListener("hashchange", handleAboutNavigation);
+    handleAboutNavigation();
     ["#privacy-open-top", "#privacy-open-result", "#privacy-open-footer"].forEach((selector) => {
       $(selector).addEventListener("click", openPrivacy);
     });
