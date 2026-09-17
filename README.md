@@ -2,6 +2,8 @@
 
 Static GitHub Pages site for the 19-item Dummies Experience Questionnaire parody.
 
+Live site: https://hisuh17.github.io/deq/
+
 ## Data design
 
 The assessment works locally in the browser. Results do not require submission. If a visitor explicitly opts in after seeing the result, the browser calls one Supabase RPC. The database increments 114 aggregate cells (19 questions × 6 answer values) and one total-submission counter in a transaction. It does not store a row containing the visitor's full response pattern.
