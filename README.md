@@ -1,4 +1,4 @@
-# DEQ public website
+# DumEQ public website
 
 Static GitHub Pages site for the 19-item Dummies Experience Questionnaire parody.
 
