@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="8" fill="#ffd84d"/>
+  <path d="M8 10h48v44H8z" fill="#fffaf0" stroke="#17150f" stroke-width="4" transform="rotate(-3 32 32)"/>
+  <text x="32" y="40" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="25" font-weight="900" fill="#d53b2f">DEQ</text>
+</svg>
