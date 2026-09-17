@@ -6,7 +6,9 @@
   const config = window.DEQ_CONFIG || {};
   const answers = Array(questions.length).fill(null);
   let currentQuestion = 0;
-  let submitted = false;
+  let saveState = "not-started";
+  let submission = null;
+  let deleting = false;
   let screenBeforeAbout = "welcome-screen";
 
   const $ = (selector) => document.querySelector(selector);
@@ -39,7 +41,7 @@
       if (active && active.id !== "about-screen") screenBeforeAbout = active.id;
       showScreen("about-screen");
       $("#about-link").setAttribute("aria-current", "page");
-      document.title = "About Hyungil Suh | DumEQ";
+      document.title = "The Human · Hyungil (Hugh) | DumEQ";
       $("#about-title").focus({ preventScroll: true });
     } else if (!$("#about-screen").hidden) {
       showScreen(screenBeforeAbout);
@@ -50,6 +52,7 @@
   }
 
   function beginFlow() {
+    updateSavingChoice();
     showScreen("intro-screen");
     window.setTimeout(() => $("#eligibility").focus(), 50);
   }
@@ -62,7 +65,8 @@
     $("#question-number").textContent = String(currentQuestion + 1).padStart(2, "0");
     $("#question-text").textContent = question.text;
     $("#question-back").textContent = currentQuestion === 0 ? "Instructions" : "Back";
-    $("#question-next").textContent = currentQuestion === questions.length - 1 ? "See results" : "Next";
+    $("#question-next").textContent = currentQuestion === questions.length - 1
+      ? ($("#data-consent").checked && !submission ? "Save & see results" : "See results") : "Next";
 
     const responseContainer = $("#response-options");
     responseContainer.replaceChildren();
@@ -152,45 +156,133 @@
     });
 
     showScreen("result-screen");
+    renderStorageStatus();
   }
 
   function databaseConfigured() {
     return Boolean(config.supabaseUrl && config.supabasePublishableKey);
   }
 
-  async function submitContribution() {
-    if (submitted || !databaseConfigured() || answers.some((answer) => answer === null)) return;
-    const button = $("#submit-answers");
-    const status = $("#submission-status");
-    button.disabled = true;
-    status.textContent = "Adding your answers to the totals…";
+  function updateSavingChoice() {
+    const optedIn = $("#data-consent").checked;
+    $("#intro-continue").disabled = !$("#eligibility").checked;
+    $("#intro-continue").textContent = optedIn ? "Continue with saving enabled" : "Continue without saving";
+    $("#saving-label").textContent = optedIn ? "Saving enabled at the final step." : "Answers stay on this page.";
+    $("#change-consent").hidden = Boolean(submission);
+  }
 
+  function renderStorageStatus() {
+    const messages = {
+      "not-started": ["Your result stays with you.", "Your answers have not been sent or saved. They disappear when you close or reload this page."],
+      saving: ["Saving your response…", "Sending the 19 answers you agreed to save. Please keep this page open."],
+      saved: ["Your response is saved.", "Your 19 answers were stored together, with your consent record. Keep the deletion code below. The response expires after 12 months."],
+      uncertain: ["We could not confirm saving.", "The response may have reached the database. You can retry safely without creating a duplicate, or use the code below to delete it. There is no automatic retry."],
+      deleted: ["Your saved response has been deleted.", "The matching answers have been removed from the live database. This result remains only on this page."]
+    };
+    const [title, message] = messages[saveState];
+    $("#storage-title").textContent = title;
+    $("#submission-status").textContent = message;
+    $("#submit-answers").hidden = saveState !== "uncertain";
+    $("#submit-answers").disabled = deleting;
+    $("#deletion-receipt").hidden = !submission || saveState === "deleted";
+    $("#receipt-code").value = submission ? submission.deletion_code : "";
+    $("#delete-current").disabled = saveState === "saving" || deleting;
+    $("#edit-answers").disabled = Boolean(submission) && saveState !== "deleted";
+    $("#start-over").disabled = saveState === "saving" || deleting;
+    $("#data-consent").disabled = Boolean(submission);
+    updateSavingChoice();
+  }
+
+  async function callDatabase(name, payload) {
+    if (!databaseConfigured()) throw new Error("Storage unavailable");
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), 15000);
     try {
-      const endpoint = `${config.supabaseUrl.replace(/\/$/, "")}/rest/v1/rpc/submit_deq_response`;
-      const response = await fetch(endpoint, {
+      const response = await fetch(`${config.supabaseUrl.replace(/\/$/, "")}/rest/v1/rpc/${name}`, {
         method: "POST",
+        credentials: "omit",
+        referrerPolicy: "no-referrer",
+        cache: "no-store",
+        signal: controller.signal,
         headers: {
           "Content-Type": "application/json",
           "apikey": config.supabasePublishableKey,
           "Accept-Profile": "public",
           "Content-Profile": "public"
         },
-        body: JSON.stringify({
-          answer_values: answers,
-          questionnaire_version: config.questionnaireVersion,
-          consent_version: config.consentVersion
-        })
+        body: JSON.stringify(payload)
       });
-      if (!response.ok) throw new Error(`Submission failed with status ${response.status}`);
-      submitted = true;
-      $("#data-consent").disabled = true;
-      button.textContent = "Contribution added";
-      status.textContent = "Thank you. Your answers were added to the aggregate counts; no individual DumEQ response row was retained.";
-    } catch (error) {
-      console.error(error);
-      button.disabled = !$("#data-consent").checked;
-      status.textContent = "The contribution could not be added. Your result is still available here, and no retry will happen automatically.";
+      if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+      return await response.json();
+    } finally {
+      window.clearTimeout(timer);
     }
+  }
+
+  async function submitContribution() {
+    if (!["not-started", "uncertain"].includes(saveState) || deleting || !$("#data-consent").checked
+        || !$("#eligibility").checked || answers.some((answer) => answer === null)) return;
+    if (!submission) {
+      const bytes = crypto.getRandomValues(new Uint8Array(32));
+      submission = {
+        answer_values: [...answers],
+        questionnaire_version: config.questionnaireVersion,
+        consent_version: config.consentVersion,
+        explicit_consent: true,
+        deletion_code: Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("")
+      };
+    }
+    saveState = "saving";
+    renderStorageStatus();
+    try {
+      const result = await callDatabase("submit_dumeq_response", submission);
+      if (result !== "saved") throw new Error("Unexpected storage response");
+      saveState = "saved";
+    } catch {
+      saveState = "uncertain";
+    }
+    renderStorageStatus();
+  }
+
+  async function deleteResponse() {
+    if (deleting || saveState === "saving") return;
+    const code = $("#deletion-code").value.trim().toLowerCase();
+    const status = $("#delete-status");
+    if (!/^[a-f0-9]{64}$/.test(code)) {
+      status.textContent = "Enter the full 64-character deletion code.";
+      return;
+    }
+    deleting = true;
+    $("#delete-response").disabled = true;
+    renderStorageStatus();
+    status.textContent = "Deleting the matching response…";
+    try {
+      const result = await callDatabase("delete_dumeq_response", { deletion_code: code });
+      if (result !== "deleted") throw new Error("Unexpected deletion response");
+      status.textContent = "Deletion complete. No saved answers remain for this code. Provider backups and logs expire separately.";
+      if (submission && code === submission.deletion_code) {
+        saveState = "deleted";
+        $("#data-consent").checked = false;
+      }
+      $("#deletion-code").value = "";
+    } catch {
+      status.textContent = "Deletion could not be confirmed. Keep your code and try again, or contact h.suh@exeter.ac.uk.";
+    } finally {
+      deleting = false;
+      $("#delete-response").disabled = false;
+      renderStorageStatus();
+    }
+  }
+
+  function downloadReceipt() {
+    if (!submission) return;
+    const content = `DumEQ deletion code\n\n${submission.deletion_code}\n\nKeep this code private. Visit https://hisuh17.github.io/deq/ and open Privacy & data to delete this response.\n\nConsent: ${submission.consent_version}\nQuestionnaire: ${submission.questionnaire_version}\nThe code alone is not confirmation that saving succeeded.\n`;
+    const url = URL.createObjectURL(new Blob([content], { type: "text/plain;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "dumeq-deletion-code.txt";
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   function renderAllQuestions() {
@@ -232,16 +324,18 @@
   }
 
   function resetAssessment() {
+    if (saveState === "saving" || deleting) return;
     answers.fill(null);
     currentQuestion = 0;
-    submitted = false;
+    saveState = "not-started";
+    submission = null;
     $("#eligibility").checked = false;
     $("#intro-continue").disabled = true;
     $("#data-consent").checked = false;
     $("#data-consent").disabled = false;
-    $("#submit-answers").textContent = "Contribute to community totals";
-    $("#submit-answers").disabled = true;
-    $("#submission-status").textContent = "";
+    $("#delete-status").textContent = "";
+    $("#deletion-code").value = "";
+    renderStorageStatus();
     showScreen("welcome-screen");
   }
 
@@ -254,7 +348,7 @@
     renderAllQuestions();
     window.addEventListener("hashchange", handleAboutNavigation);
     handleAboutNavigation();
-    ["#privacy-open-top", "#privacy-open-result", "#privacy-open-footer"].forEach((selector) => {
+    ["#privacy-open-top", "#privacy-open-intro", "#privacy-open-result", "#privacy-open-footer"].forEach((selector) => {
       $(selector).addEventListener("click", openPrivacy);
     });
     $("#start-button").addEventListener("click", beginFlow);
@@ -262,11 +356,9 @@
     $("#questions-home").addEventListener("click", () => showScreen("welcome-screen"));
     $("#questions-start").addEventListener("click", beginFlow);
     $("#intro-back").addEventListener("click", () => showScreen("welcome-screen"));
-    $("#eligibility").addEventListener("change", (event) => {
-      $("#intro-continue").disabled = !event.target.checked;
-    });
+    $("#eligibility").addEventListener("change", updateSavingChoice);
     $("#intro-continue").addEventListener("click", () => {
-      currentQuestion = 0;
+      if (!$("#eligibility").checked) return;
       showScreen("quiz-screen");
       renderQuestion();
     });
@@ -278,27 +370,49 @@
     });
     $("#question-next").addEventListener("click", () => {
       if (answers[currentQuestion] === null) return;
-      if (currentQuestion === questions.length - 1) return renderResults();
+      if (currentQuestion === questions.length - 1) {
+        renderResults();
+        if ($("#data-consent").checked && !submission) void submitContribution();
+        return;
+      }
       currentQuestion += 1;
       renderQuestion();
     });
     $("#edit-answers").addEventListener("click", () => {
+      if (submission && saveState !== "deleted") return;
       currentQuestion = 0;
       showScreen("quiz-screen");
       renderQuestion();
     });
-    $("#data-consent").addEventListener("change", (event) => {
-      $("#submit-answers").disabled = !event.target.checked || submitted || !databaseConfigured();
-      if (!databaseConfigured()) $("#submission-status").textContent = "Community contribution is not connected yet.";
-    });
+    $("#data-consent").addEventListener("change", updateSavingChoice);
+    $("#change-consent").addEventListener("click", beginFlow);
     $("#submit-answers").addEventListener("click", submitContribution);
+    $("#delete-response").addEventListener("click", deleteResponse);
+    $("#delete-current").addEventListener("click", () => {
+      if (!submission || saveState === "saving") return;
+      $("#deletion-code").value = submission.deletion_code;
+      openPrivacy();
+      $("#deletion-code").scrollIntoView({ block: "center" });
+      $("#delete-response").focus({ preventScroll: true });
+    });
+    $("#copy-receipt").addEventListener("click", async () => {
+      if (!submission) return;
+      try {
+        await navigator.clipboard.writeText(submission.deletion_code);
+        showToast("Deletion code copied. Keep it somewhere private.");
+      } catch {
+        $("#receipt-code").select();
+        showToast("Select and copy the code, or use Download code.");
+      }
+    });
+    $("#download-receipt").addEventListener("click", downloadReceipt);
     $("#share-site").addEventListener("click", shareSite);
     $("#start-over").addEventListener("click", resetAssessment);
 
     document.addEventListener("keydown", (event) => {
-      if ($("#quiz-screen").hidden || event.altKey || event.ctrlKey || event.metaKey) return;
+      if ($("#quiz-screen").hidden || $("#privacy-dialog").open || event.altKey || event.ctrlKey || event.metaKey) return;
       const value = Number(event.key);
-      if (Number.isInteger(value) && value >= 0 && value <= 5) {
+      if (/^[0-5]$/.test(event.key) && Number.isInteger(value)) {
         const input = $(`#response-options input[value="${value}"]`);
         input.checked = true;
         input.dispatchEvent(new Event("change", { bubbles: true }));
